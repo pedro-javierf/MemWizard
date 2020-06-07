@@ -12,7 +12,8 @@ def debug(text):
 
 def main():
     debug("MemWizard v"+ VERSION)
-    #mainWindow = MemWizardGUI()
+    engine = MemWizardEngine()
+    mainWindow = MemWizardGUI(engine)
 
 if __name__ == '__main__':
     main()
