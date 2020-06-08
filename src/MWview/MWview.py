@@ -16,7 +16,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Memory Wizard")
 
         self.form_widget = FormWidget(self,self.engine) 
-        self.setCentralWidget(self.form_widget) 
+        self.setCentralWidget(self.form_widget) #if uncommented the status bar disapears
         
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)

@@ -2,6 +2,7 @@
 
 from MWview.MWview import MemWizardGUI
 from MWengine.MWengine import MemWizardEngine
+from MWengine.ropengine import ARMRopSubengine
 
 VERSION = "1.0"
 DEBUG = True

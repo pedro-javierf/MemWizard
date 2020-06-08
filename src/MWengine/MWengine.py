@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import os
-import ropengine
+from MWengine.ropengine import ARMRopSubengine
 try:
     from capstone import *
     from capstone.arm import *
@@ -57,12 +57,16 @@ class MemWizardEngine:
         else:
             print("ERROR")
 
+    def dissasemble(self):
+        #choose the correct subengine depending on the architecture
+        #if(archo==arm ARMRopSubengine)
+        self.ropengine = ARMRopSubengine(self.binary, self.md.disasm(CODE, 0x0))
 
     def searchROPGadget(self):
         print("[>] Starting ROP search task...")
-        self.ropengine = RopSubengine(self.binary, self.md.disasm(CODE, 0x0))
+        dissasemble()
+        #self.ropengine = RopSubengine(self.binary, self.md.disasm(CODE, 0x0))
         self.ropengine.locateReturns()
-        self.ropengine.traceGadgets()
         
 
     def searchJOPGadget(self):
