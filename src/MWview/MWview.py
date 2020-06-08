@@ -2,7 +2,7 @@
 
 import sys
 from PySide2.QtWidgets import *
-from PySide2.QtGui import QIcon, QKeySequence, QStandardItemModel
+from PySide2.QtGui import QIcon, QKeySequence, QStandardItemModel, QColor
 from PySide2.QtCore import Slot, Qt
 
 @Slot()
@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         optionMenu = self.menuBar().addMenu("Export")
 
         defineAction = QAction('Export as DEFINE .h file', self)
-        otherAction = QAction('TODO', self)
+        otherAction = QAction('Export as payload (binary) [TODO]', self)
         optionMenu.addAction(defineAction)
         optionMenu.addAction(otherAction)
 
@@ -58,8 +58,12 @@ class FormWidget(QWidget):
     def __init__(self, parent,MWengine):        
         super(FormWidget, self).__init__(parent)
 
-        #Top layout containing the other two
-        self.topLayout = QHBoxLayout(self)
+        #top layer containing the buttons layer(s) + the console layer
+        self.topLayout = QVBoxLayout(self)
+
+        #second layer layout containing the vertical ones
+        self.layer2Layout = QHBoxLayout(self)
+        self.consoleLayout = QHBoxLayout(self) #the type of layout doesn't matter as it's only going to have 1 component
 
         #Layout for the components in the left or the right
         self.leftLayout = QVBoxLayout(self)
@@ -122,11 +126,25 @@ class FormWidget(QWidget):
         self.rightLayout.addWidget(self.analButton)
 
         ###################################################
+        ######### console #################################
+        ###################################################
+        
+        console = QTextEdit()
+        console.setStyleSheet("background-color: rgb(0, 44, 66);")
+        console.setTextColor(QColor(255, 255, 255))
+        console.setText("MW Console")
+        self.consoleLayout.addWidget(console)
 
         #Register the left&right layouts in the top one
-        self.topLayout.addLayout(self.leftLayout)
+        self.layer2Layout.addLayout(self.leftLayout)
         self.rightLayout.setAlignment(Qt.AlignTop)
-        self.topLayout.addLayout(self.rightLayout)
+        self.layer2Layout.addLayout(self.rightLayout)
+
+        #elements
+        self.topLayout.addLayout(self.layer2Layout)
+
+        #console
+        self.topLayout.addLayout(self.consoleLayout)
 
         #The final window layout is the top one
         self.setLayout(self.topLayout)
