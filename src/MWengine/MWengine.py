@@ -8,6 +8,8 @@ except ImportError:
     print("[!] Cannot import the capstone module")
     sys.exit(1)
 
+AVAILABLE_ENGINES = ['ARM','ARM64']
+
 class Binary:
     filesize=0
     memory=[]
@@ -15,16 +17,26 @@ class Binary:
         filesize = os.path.getsize(str(filename[0]))
         with open(filename[0], "rb") as f:
             memory = f.read(filesize)
+        print(memory)
 
-    
+
+#Dissasembly is done in this class and passed to the different engines to find rop gadgets
 '''https://www.blopig.com/blog/2016/08/processing-large-files-using-python/'''
 class MemWizardEngine:
-    def __init__(self):
-        # Set default capstone values
-        self.ropengine = ARMRopSubengine(0)
-        self.md = Cs(CS_ARCH_ARM, CS_MODE_ARM + CS_MODE_LITTLE_ENDIAN)
+    def __init__(self,architect='ARM'):
+        # Set capstone values
+        if(architect is 'ARM'):
+            self.ropengine = ARMRopSubengine(0)
+            self.jopengine = self.ropengine
+            self.md = Cs(CS_ARCH_ARM, CS_MODE_ARM + CS_MODE_LITTLE_ENDIAN)
+        else:
+            self.ropengine = ARMRopSubengine(0)
+            self.jopengine = self.ropengine
+            self.md = Cs(CS_ARCH_ARM, CS_MODE_ARM + CS_MODE_LITTLE_ENDIAN)
+
         self.md.detail = True
         self.md.skipdata = True
+
         print("MemoryWizard engine started.")
     
     #Returns the information for the view tables
@@ -32,18 +44,28 @@ class MemWizardEngine:
         return self.ropengine.getData()
 
     def getJOPData(self):
-        return self.ropengine.getData()
+        return self.jopengine.getData()
 
+    #1 load file in memory
     def loadFile(self, filename):
         #creates a dissasembled version of a binary in memory
         print(filename)
-        self.binary = Binary(filename)
-        self.loaded = True
-        #return true
+        try:
+            self.binary = Binary(filename)
+            self.loaded = True
+        except:
+            self.loaded = False
+        return self.loaded
         
-    def runAnalysis(self):
+    #2 run dissasembly
+    def runDissasembly(self):
         if(self.loaded):
-            self.md.detail = True
+            self.dissasembly = self.md.disasm(bytes(self.binary.memory),0)
+            self.ropengine = ARMRopSubengine(self.dissasembly)
+
+    #3 call analyzer engines
+    def runAnalysis(self):
+        self.ropengine.locateReturns()
 
     #Dynamically change the architecture
     def changeArchitecture(self, newArch, endianess):
@@ -64,11 +86,6 @@ class MemWizardEngine:
             self.md = Cs(CS_ARCH_X86, CS_MODE_64 + e)
         else:
             print("ERROR")
-
-    def dissasemble(self):
-        #choose the correct subengine depending on the architecture
-        #if(archo==arm ARMRopSubengine)
-        self.ropengine = ARMRopSubengine(self.md.disasm(CODE, 0x0))
 
     def searchROPGadget(self):
         print("[>] Starting ROP search task...")

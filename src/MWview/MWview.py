@@ -5,9 +5,7 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import QIcon, QKeySequence, QStandardItemModel, QColor
 from PySide2.QtCore import Slot, Qt, QAbstractTableModel, QModelIndex
 
-@Slot()
-def say_hello():
-    print("Button clicked, Hello!")
+AVAILABLE_ARCHS = ['ARM', 'ARM64', 'x86','x86-64','PPC','MIPS']
 
 #https://doc.qt.io/qtforpython/tutorials/datavisualize/add_tableview.html
 class CustomTableModel(QAbstractTableModel):
@@ -18,7 +16,7 @@ class CustomTableModel(QAbstractTableModel):
     def load_data(self, data): #data is a list(or dictionary) of lists
         self.input_addresses = data[0]
         self.input_mnemonics = data[1]
-        self.input_others = data[2]
+        self.input_others    = data[2]
 
         self.column_count = 3
         self.row_count = len(self.input_addresses)
@@ -66,6 +64,7 @@ class MainWindow(QMainWindow):
     def __init__(self, MWengine, parent=None):
         super(MainWindow, self).__init__()
         self.engine = MWengine
+        self.binLoaded = False
         self.setWindowTitle("Memory Wizard")
 
         self.form_widget = FormWidget(self,self.engine) 
@@ -103,13 +102,15 @@ class MainWindow(QMainWindow):
     @Slot()
     def loadFileDialog(self):
         fname = QFileDialog.getOpenFileName(self)
-        self.engine.loadFile(fname)
+        self.binLoaded = self.engine.loadFile(fname)
 
 
 class FormWidget(QWidget):
 
     def __init__(self, parent, MWengine):        
         super(FormWidget, self).__init__(parent)
+        self.parent = parent
+        self.engine = MWengine
 
         #top layer containing the buttons layer(s) + the console layer
         self.topLayout = QVBoxLayout(self)
@@ -165,7 +166,8 @@ class FormWidget(QWidget):
         self.baseValue.setEnabled(False)
 
         self.archLabel = QLabel("Architecture")
-        self.listWidget = QComboBox() 
+        self.listWidget = QComboBox()
+        self.listWidget.addItems(AVAILABLE_ARCHS)
         self.listWidget.insertSeparator(-1) #separator in all the entries 
         
         self.analButton = QPushButton("Run Analysis")
@@ -207,7 +209,12 @@ class FormWidget(QWidget):
 
     @Slot()
     def analysis(self):
-        print("analysis")
+        if(self.parent.binLoaded):
+            print("[>] Analysis: "+self.getChosenArch())
+            self.engine.runDissasembly()
+            self.engine.runAnalysis()
+        else:
+            print("[!] Load a binary first!")
 
     @Slot()
     def toggleBaseBox(self,state):
@@ -215,6 +222,9 @@ class FormWidget(QWidget):
             self.baseValue.setEnabled(True)
         else:
             self.baseValue.setEnabled(False)
+
+    def getChosenArch(self):
+        return str(self.listWidget.currentText()) #returns one of the available archs
 
 class MemWizardGUI:
     def __init__(self, engine):
