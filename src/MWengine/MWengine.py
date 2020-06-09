@@ -21,11 +21,19 @@ class Binary:
 class MemWizardEngine:
     def __init__(self):
         # Set default capstone values
+        self.ropengine = ARMRopSubengine(0)
         self.md = Cs(CS_ARCH_ARM, CS_MODE_ARM + CS_MODE_LITTLE_ENDIAN)
         self.md.detail = True
         self.md.skipdata = True
         print("MemoryWizard engine started.")
     
+    #Returns the information for the view tables
+    def getROPData(self):
+        return self.ropengine.getData()
+
+    def getJOPData(self):
+        return self.ropengine.getData()
+
     def loadFile(self, filename):
         #creates a dissasembled version of a binary in memory
         print(filename)
@@ -60,7 +68,7 @@ class MemWizardEngine:
     def dissasemble(self):
         #choose the correct subengine depending on the architecture
         #if(archo==arm ARMRopSubengine)
-        self.ropengine = ARMRopSubengine(self.binary, self.md.disasm(CODE, 0x0))
+        self.ropengine = ARMRopSubengine(self.md.disasm(CODE, 0x0))
 
     def searchROPGadget(self):
         print("[>] Starting ROP search task...")
