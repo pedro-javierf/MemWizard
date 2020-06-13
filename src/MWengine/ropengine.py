@@ -40,7 +40,9 @@ class ARMRopSubengine:
     #POP {R3,R0,PC}
     #LDMFD    sp!, {r3,r0,pc}
     def locateReturns(self):
+        print(len(self.dissas))
         for i in self.dissas:
+            print("ha")
             print("0x%x:\t%s\t%s" %(i.address, i.mnemonic, i.op_str))
             print("1")
             '''
@@ -51,7 +53,7 @@ class ARMRopSubengine:
             
             if i.id in (ARM_INS_POP) and ("pc" in i.op_str):
                 self.candidates[i] = PreviousInstructionsSet(self.prevInst0,self.prevInst1,self.prevInst2,self.prevInst3)'''
-        print("ha")
+        
 
 
         
