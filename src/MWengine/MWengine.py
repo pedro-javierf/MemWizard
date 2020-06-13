@@ -10,15 +10,6 @@ except ImportError:
 
 AVAILABLE_ENGINES = ['ARM','ARM64']
 
-class Binary:
-    filesize=0
-    memory=[]
-    def __init__(self,filename):
-        filesize = os.path.getsize(str(filename[0]))
-        with open(filename[0], "rb") as f:
-            memory = f.read(filesize)
-        print(memory)
-
 
 #Dissasembly is done in this class and passed to the different engines to find rop gadgets
 '''https://www.blopig.com/blog/2016/08/processing-large-files-using-python/'''
@@ -51,21 +42,23 @@ class MemWizardEngine:
         #creates a dissasembled version of a binary in memory
         print(filename)
         try:
-            self.binary = Binary(filename)
+            filesize = os.path.getsize(str(filename[0])) #add huge memory checks
+            with open(filename[0], "rb") as f:
+                self.memory = f.read(filesize)
+
+            self.dissasembly = self.md.disasm(self.memory,0)
+            self.ropengine = ARMRopSubengine(self.dissasembly)
             self.loaded = True
         except:
             self.loaded = False
         return self.loaded
         
-    #2 run dissasembly
-    def runDissasembly(self):
-        if(self.loaded):
-            self.dissasembly = self.md.disasm(bytes(self.binary.memory),0)
-            self.ropengine = ARMRopSubengine(self.dissasembly)
+            
 
     #3 call analyzer engines
     def runAnalysis(self):
-        self.ropengine.locateReturns()
+        if(self.loaded):
+            self.ropengine.locateReturns()
 
     #Dynamically change the architecture
     def changeArchitecture(self, newArch, endianess):

@@ -12,10 +12,11 @@ class CustomTableModel(QAbstractTableModel):
     def __init__(self, data=None):
         QAbstractTableModel.__init__(self)
         self.load_data(data)
+        self.base_addr = 0
 
     def load_data(self, data): #data is a list(or dictionary) of lists
         self.input_addresses = data[0]
-        self.input_mnemonics = data[1]
+        self.input_gadgetdesc = data[1]
         self.input_others    = data[2]
 
         self.column_count = 3
@@ -31,7 +32,7 @@ class CustomTableModel(QAbstractTableModel):
         if role != Qt.DisplayRole:
             return None
         if orientation == Qt.Horizontal:
-            return ("ADDRESS", "MNEMONIC", "MODE")[section]
+            return ("ADDRESS", "GADGET", "MODE")[section]
         else:
             return "{}".format(section)
 
@@ -41,12 +42,12 @@ class CustomTableModel(QAbstractTableModel):
         row = index.row()
 
         #Actual data display/dispatcher
-        if role == Qt.DisplayRole:
+        if role == Qt.DisplayRole and row>=0:
             if column == 0:
                 columnVals = self.input_addresses[row]
                 return columnVals
             elif column == 1:
-                columnVals = self.input_mnemonics[row]
+                columnVals = self.input_gadgetdesc[row]
                 return columnVals
             elif column == 2:
                 columnVals = self.input_others[row]
@@ -56,9 +57,23 @@ class CustomTableModel(QAbstractTableModel):
             return QColor(Qt.white) #background color
 
         elif role == Qt.TextAlignmentRole:
-            return Qt.AlignRight
+            return Qt.AlignLeft
 
         return None
+
+    #Update the whole set of data
+    #UNUSED (yet)
+    def setData(self, newData):
+        self.load_data(newData)
+
+    def applyBaseToDataset(self, base_addr):
+        self.base_addr=base_addr
+        for i in self.input_addresses:
+            i = str(int(i,0) + int(base_addr))
+
+    def removeBaseAddr(self):
+        for i in self.input_addresses:
+            i = str(int(i,0) - int(self.base_addr))
 
 class MainWindow(QMainWindow):
     def __init__(self, MWengine, parent=None):
@@ -163,6 +178,7 @@ class FormWidget(QWidget):
         self.cb1 = QCheckBox("Set base address?")
         self.cb1.stateChanged.connect(self.toggleBaseBox)
         self.baseValue = QLineEdit()
+        self.baseValue.setText("0") #default value
         self.baseValue.setEnabled(False)
 
         self.archLabel = QLabel("Architecture")
@@ -211,8 +227,13 @@ class FormWidget(QWidget):
     def analysis(self):
         if(self.parent.binLoaded):
             print("[>] Analysis: "+self.getChosenArch())
-            self.engine.runDissasembly()
             self.engine.runAnalysis()
+
+            #reset model to force view update
+            #there is a better way using model.setData()
+            self.ROPmodel = CustomTableModel(self.engine.getROPData())
+            self.tableROP.setModel(self.ROPmodel)
+
         else:
             print("[!] Load a binary first!")
 
@@ -220,6 +241,7 @@ class FormWidget(QWidget):
     def toggleBaseBox(self,state):
         if state > 0:
             self.baseValue.setEnabled(True)
+            self.ROPmodel.applyBaseToDataset(int(self.baseValue.text()))
         else:
             self.baseValue.setEnabled(False)
 

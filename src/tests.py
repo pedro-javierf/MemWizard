@@ -1,7 +1,7 @@
 from capstone import *
 from capstone.arm import *
 import os
-CODE = b"\x09\x80\xBD\xE8"
+#CODE = b"\x09\x80\xBD\xE8"
 
 filesize = os.path.getsize(str("D:\Github\MemWizard\src\ARMbigendianSample.bin"))
 with open("D:\Github\MemWizard\src\ARMbigendianSample.bin", "rb") as f:

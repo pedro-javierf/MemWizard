@@ -25,26 +25,30 @@ class PreviousInstructionsSet:
 
 class ARMRopSubengine:
     def __init__(self, dissas):
+        print(str(type(dissas)))
         self.dissas = dissas
-        self.candidates = dict() #empty dictionary <instruction, PreviousInstructionsSet>
+        #self.candidates = dict() #empty dictionary <instruction, PreviousInstructionsSet>
+        self.data = dict()
+        self.data[0] = [] #new empty list for addresses
+        self.data[1] = [] #new empty list for gadget mnemonics
+        self.data[2] = [] #new empty list for mode string
         print("[>] Rop Subengine Initialized")
     
     def getData(self):
-        return {
-                0: ["Ford","pop PC"],
-                1: ["Mustang", "mov r3, r4"],
-                2: [1964,"3000"]
-                }
+        return self.data
 
     #find all POPs that pop the PC. i.e:
     #POP {R3,R0,PC}
     #LDMFD    sp!, {r3,r0,pc}
     def locateReturns(self):
-        print(len(self.dissas))
         for i in self.dissas:
-            print("ha")
+            
             print("0x%x:\t%s\t%s" %(i.address, i.mnemonic, i.op_str))
-            print("1")
+            if("pc" in i.op_str):
+                print("new gadget added")
+                self.data[0].append(str(hex(i.address)))
+                self.data[1].append(str(i.mnemonic) + str(i.op_str))
+                self.data[2].append("ARM") 
             '''
             self.prevInst0=self.prevInst1
             self.prevInst1=self.prevInst2
@@ -52,8 +56,8 @@ class ARMRopSubengine:
             self.prevInst3=i
             
             if i.id in (ARM_INS_POP) and ("pc" in i.op_str):
-                self.candidates[i] = PreviousInstructionsSet(self.prevInst0,self.prevInst1,self.prevInst2,self.prevInst3)'''
-        
+                self.candidates[i] = PreviousInstructionsSet(self.prevInst0,self.prevInst1,self.prevInst2,self.prevInst3)'''               
+
 
 
         
