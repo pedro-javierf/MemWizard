@@ -57,7 +57,7 @@ class CustomTableModel(QAbstractTableModel):
             return QColor(Qt.white) #background color
 
         elif role == Qt.TextAlignmentRole:
-            return Qt.AlignLeft
+            return Qt.AlignCenter
 
         return None
 
@@ -78,6 +78,8 @@ class CustomTableModel(QAbstractTableModel):
 class MainWindow(QMainWindow):
     def __init__(self, MWengine, parent=None):
         super(MainWindow, self).__init__()
+        self.setFixedSize(780, 580)
+
         self.engine = MWengine
         self.binLoaded = False
         self.setWindowTitle("Memory Wizard")
@@ -152,6 +154,18 @@ class FormWidget(QWidget):
         # Set the view's model
         self.tableROP = QTableView()
         self.tableROP.setModel(self.ROPmodel)
+        # Configure sizes
+        header = self.tableROP.horizontalHeader()       
+        header.setSectionResizeMode(0, QHeaderView.Stretch) 
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+
+        self.tableROP.resizeRowsToContents()
+        #h2 = self.tableROP.verticalHeader()
+        #h2.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        #h2.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        #h2.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+
         self.leftLayout.addWidget(self.tableROP)
 
         #JOP content
@@ -233,6 +247,9 @@ class FormWidget(QWidget):
             #there is a better way using model.setData()
             self.ROPmodel = CustomTableModel(self.engine.getROPData())
             self.tableROP.setModel(self.ROPmodel)
+
+            #adjust size of the cells
+            self.tableROP.resizeRowsToContents()
 
         else:
             print("[!] Load a binary first!")

@@ -59,6 +59,7 @@ class MemWizardEngine:
     def runAnalysis(self):
         if(self.loaded):
             self.ropengine.locateReturns()
+            self.ropengine.updateDataWithUseful()
 
     #Dynamically change the architecture
     def changeArchitecture(self, newArch, endianess):
