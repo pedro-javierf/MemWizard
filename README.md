@@ -1,5 +1,6 @@
-# MemWizard
 <centre>![MemoryWizard logo](logo.png)</centre>
+
+# MemWizard
  Advanced ROP and JOP gadget finder with Graphical User Interface
 
 # Support
