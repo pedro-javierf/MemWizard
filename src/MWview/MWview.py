@@ -177,6 +177,13 @@ class FormWidget(QWidget):
 
         self.tableJOP = QTableView()
         self.tableJOP.setModel(self.JOPmodel)
+
+        # Configure sizes
+        header = self.tableJOP.horizontalHeader()       
+        header.setSectionResizeMode(0, QHeaderView.Stretch) 
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+
         self.leftLayout.addWidget(self.tableJOP)
 
         '''https://doc.qt.io/qtforpython/tutorials/datavisualize/add_tableview.html'''
@@ -250,6 +257,7 @@ class FormWidget(QWidget):
 
             #adjust size of the cells
             self.tableROP.resizeRowsToContents()
+            self.tableJOP.resizeRowsToContents()
 
         else:
             print("[!] Load a binary first!")

@@ -8,8 +8,10 @@ except ImportError:
     sys.exit(1)
 
 USEFUL_INSTRUCTIONS_OPERATIONS = [ARM_INS_MOV,ARM_INS_LDR,ARM_INS_STR,ARM_INS_SVC]
-BREAKING_INSTRUCTIONS = [ARM_INS_B,ARM_INS_BL,ARM_INS_BLX,ARM_INS_BX,ARM_INS_BXJ] #If found just before the POP, gadget is not useful
-KNOWN_RETURN_INSTRUCTIONS = [ARM_INS_POP]
+KNOWN_BRANCH_INSTRUCTIONS = [ARM_INS_B,ARM_INS_BL,ARM_INS_BLX,ARM_INS_BX,ARM_INS_BXJ] #If found just before the POP, gadget is not useful
+
+KNOWN_DISPATCHER_INSTRUCTION = []
+
 PREVIOUS_THRESHOLD = 2
 
 class PreviousInstructionsSet:
@@ -29,10 +31,11 @@ class PreviousInstructionsSet:
         result =  self.i1.mnemonic + " " + self.i1.op_str + "\n" + self.i2.mnemonic + " " + self.i2.op_str + "\n" + self.i3.mnemonic + " " + self.i3.op_str
         return result
 
-class ARMRopSubengine:
+class ARMJopSubengine:
     def __init__(self, dissas):
         print(str(type(dissas)))
         self.dissas = dissas
+        
 
         self.prevInst0=0
         self.prevInst1=0
@@ -41,6 +44,7 @@ class ARMRopSubengine:
 
         self.candidates = dict() #empty dictionary <instruction, PreviousInstructionsSet>
         
+        self.dispatcher = None
         self.data = dict()
         self.data[0] = [] #new empty list for addresses
         self.data[1] = [] #new empty list for gadget mnemonics
@@ -49,6 +53,9 @@ class ARMRopSubengine:
     
     def getData(self):
         return self.data
+
+    def locateDispatcher(self):
+        return 0
 
     #find all POPs that pop the PC. i.e:
     #POP {R3,R0,PC}
@@ -60,7 +67,7 @@ class ARMRopSubengine:
             self.prevInst2=self.prevInst3
             self.prevInst3=i
             
-            if (i.id in KNOWN_RETURN_INSTRUCTIONS) and ("pc" in i.op_str):
+            if (i.id in KNOWN_BRANCH_INSTRUCTIONS) and ("pc" in i.op_str):
                 print("[*] possible gadget")
                 self.candidates[i] = PreviousInstructionsSet(self.prevInst0,self.prevInst1,self.prevInst2,i)            
 
