@@ -1,8 +1,9 @@
 
 
 # MemWizard
- ROP and JOP gadget finder for binary exploitation with Graphical User Interface
- ![MemoryWizard logo](logo.png)
+ ROP and JOP gadget finder for binary exploitation with Graphical User Interface (GUI). Oriented to memory dumps rather than fully structured binaries.
+
+ <img src="logo.png" height="125" width="125">
  
 # Features
 See [this listing](https://github.com/pedro-javierf/MemWizard/projects/1)
