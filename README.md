@@ -2,8 +2,8 @@
 
 # MemWizard
  ROP and JOP gadget finder for binary exploitation with Graphical User Interface
- 
- <center>![MemoryWizard logo](logo.png)</center>
+ ![MemoryWizard logo](logo.png)
+
 
 # Support
  Memory Wizard can run wherever a Python 3 interpreter with support for "Qt for Python" and the "Capstone engine" are available. Mainstream operating systems like Windows, Linux distros and macOS are supported.
